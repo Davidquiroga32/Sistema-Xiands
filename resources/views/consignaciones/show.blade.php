@@ -76,13 +76,13 @@
             </div>
         </div>
 
-        @if ($consignacion->comprobante_path)
+        @if ($consignacion->comprobante_path && isset($comprobanteUrl))
             <div class="card-dark" style="padding:1rem;margin-bottom:1rem;">
                 <div style="font-size:0.6rem;color:var(--silver-dark);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem;">Comprobante</div>
                 @if (($consignacion->comprobante_tipo ?? '') === 'imagen')
-                    <img src="{{ asset('storage/' . $consignacion->comprobante_path) }}" alt="Comprobante" style="width:100%;max-height:300px;object-fit:contain;border-radius:8px;">
+                    <img src="{{ $comprobanteUrl }}" alt="Comprobante" style="width:100%;max-height:300px;object-fit:contain;border-radius:8px;">
                 @else
-                    <a href="{{ asset('storage/' . $consignacion->comprobante_path) }}" target="_blank" style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--silver-light);font-size:0.8rem;transition:all 0.2s;">
+                    <a href="{{ $comprobanteUrl }}" target="_blank" style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--silver-light);font-size:0.8rem;transition:all 0.2s;">
                         <span style="font-size:1.5rem;">&#9671;</span>
                         <span>Ver documento</span>
                     </a>

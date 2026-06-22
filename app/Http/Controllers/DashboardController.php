@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Persona;
 use App\Models\Consignacion;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\Persona;
 use Illuminate\View\View;
 
 class DashboardController extends Controller

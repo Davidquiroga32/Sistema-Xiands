@@ -138,6 +138,8 @@
 
     <x-bottom-nav />
 
+    <x-toast />
+
     @livewireScripts
 
     <script>

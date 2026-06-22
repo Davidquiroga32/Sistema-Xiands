@@ -23,7 +23,7 @@
         <span style="font-size:0.6rem;letter-spacing:0.08em;font-weight:500;">Consign.</span>
     </a>
 
-    <a href="#"
+    <a href="{{ route('reportes.index') }}"
        class="flex flex-col items-center gap-1 py-2 px-6 text-decoration-none {{ str_starts_with($routeName, 'reportes') ? 'text-[--silver-light]' : 'text-[--silver-dark]' }} transition-colors duration-200 hover:text-[--silver]">
         <span style="font-size:1.1rem;">&#9670;</span>
         <span style="font-size:0.6rem;letter-spacing:0.08em;font-weight:500;">Reportes</span>

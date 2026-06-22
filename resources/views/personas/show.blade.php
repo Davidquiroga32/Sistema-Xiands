@@ -51,25 +51,33 @@
         </div>
     </div>
 
-    <div style="position:sticky;top:65px;z-index:90;background:rgba(8,8,8,0.95);backdrop-filter:blur(15px);border-bottom:1px solid var(--border);padding:0 1.25rem;display:flex;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;">
-        <button @click="activeTab = 'consig'"
-                class="tab-btn"
-                style="flex-shrink:0;padding:0.9rem 1.2rem;background:transparent;border:none;border-bottom:2px solid transparent;font-family:'Inter',sans-serif;font-size:0.75rem;font-weight:500;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;white-space:nowrap;"
-                :style="activeTab === 'consig' ? 'color:var(--silver-bright);border-bottom-color:var(--silver);' : 'color:var(--silver-dark);'">
-            Consignaciones
-        </button>
-        <button @click="activeTab = 'datos'"
-                class="tab-btn"
-                style="flex-shrink:0;padding:0.9rem 1.2rem;background:transparent;border:none;border-bottom:2px solid transparent;font-family:'Inter',sans-serif;font-size:0.75rem;font-weight:500;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;white-space:nowrap;"
-                :style="activeTab === 'datos' ? 'color:var(--silver-bright);border-bottom-color:var(--silver);' : 'color:var(--silver-dark);'">
-            Datos
-        </button>
-        <button @click="activeTab = 'stats'"
-                class="tab-btn"
-                style="flex-shrink:0;padding:0.9rem 1.2rem;background:transparent;border:none;border-bottom:2px solid transparent;font-family:'Inter',sans-serif;font-size:0.75rem;font-weight:500;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;white-space:nowrap;"
-                :style="activeTab === 'stats' ? 'color:var(--silver-bright);border-bottom-color:var(--silver);' : 'color:var(--silver-dark);'">
-            Estad&iacute;sticas
-        </button>
+    <div style="padding:0.5rem 1.25rem 1rem;">
+        <div class="card-dark" style="padding:0.4rem;display:flex;gap:0.3rem;">
+            <button @click="activeTab = 'consig'"
+                class="flex-1 text-center py-3 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer"
+                style="border:none;font-family:'Inter',sans-serif;font-size:0.75rem;letter-spacing:0.04em;"
+                :style="activeTab === 'consig'
+                    ? 'background:linear-gradient(135deg,#2a2a2a,#3a3a3a);color:var(--silver-bright);box-shadow:0 2px 8px rgba(0,0,0,0.3);'
+                    : 'background:transparent;color:var(--silver-dark);'">
+                Consignaciones
+            </button>
+            <button @click="activeTab = 'datos'"
+                class="flex-1 text-center py-3 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer"
+                style="border:none;font-family:'Inter',sans-serif;font-size:0.75rem;letter-spacing:0.04em;"
+                :style="activeTab === 'datos'
+                    ? 'background:linear-gradient(135deg,#2a2a2a,#3a3a3a);color:var(--silver-bright);box-shadow:0 2px 8px rgba(0,0,0,0.3);'
+                    : 'background:transparent;color:var(--silver-dark);'">
+                Datos
+            </button>
+            <button @click="activeTab = 'stats'"
+                class="flex-1 text-center py-3 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer"
+                style="border:none;font-family:'Inter',sans-serif;font-size:0.75rem;letter-spacing:0.04em;"
+                :style="activeTab === 'stats'
+                    ? 'background:linear-gradient(135deg,#2a2a2a,#3a3a3a);color:var(--silver-bright);box-shadow:0 2px 8px rgba(0,0,0,0.3);'
+                    : 'background:transparent;color:var(--silver-dark);'">
+                Estad&iacute;sticas
+            </button>
+        </div>
     </div>
 
     {{-- TAB: CONSIGNACIONES --}}
@@ -256,10 +264,12 @@
                 @csrf
                 <input type="hidden" name="persona_id" value="{{ $persona->id }}">
 
-                <div style="margin-bottom:1rem;">
-                    <label class="label-dark" style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--silver-dark);margin-bottom:0.4rem;display:block;">Monto</label>
-                    <input type="number" name="valor_consignado" class="input-dark" placeholder="$ 0.00" required style="font-size:0.9rem;">
-                </div>
+                <x-money-input
+                    name="valor_consignado"
+                    label="Monto"
+                    placeholder="$ 0"
+                    required
+                />
 
                 <div style="margin-bottom:1rem;">
                     <label class="label-dark" style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--silver-dark);margin-bottom:0.4rem;display:block;">Fecha</label>

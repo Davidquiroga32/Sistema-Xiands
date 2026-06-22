@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Persona;
 use App\Http\Requests\StorePersonaRequest;
 use App\Http\Requests\UpdatePersonaRequest;
+use App\Models\Persona;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -68,6 +68,8 @@ class PersonaController extends Controller
 
     public function destroy(Persona $persona): RedirectResponse
     {
+        $this->authorize('delete', $persona);
+
         $persona->delete();
 
         return redirect()
