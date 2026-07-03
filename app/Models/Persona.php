@@ -20,8 +20,16 @@ class Persona extends Model implements AuditableContract
         'numero_telefono',
         'direccion',
         'nombre_codeudor',
+        'tasa_interes',
         'created_by',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'tasa_interes' => 'decimal:2',
+        ];
+    }
 
     public function creador()
     {

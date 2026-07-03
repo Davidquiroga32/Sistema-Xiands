@@ -22,6 +22,7 @@ class Consignacion extends Model implements AuditableContract
         'observacion',
         'comprobante_path',
         'comprobante_tipo',
+        'tasa_aplicada',
         'interes_aplicado',
         'total_con_interes',
         'created_by',
@@ -33,6 +34,7 @@ class Consignacion extends Model implements AuditableContract
     {
         return [
             'fecha_consignacion' => 'date',
+            'tasa_aplicada' => 'decimal:2',
             'interes_aplicado' => 'decimal:2',
             'total_con_interes' => 'decimal:2',
             'valor_consignado' => 'decimal:2',

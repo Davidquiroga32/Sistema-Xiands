@@ -6,6 +6,7 @@ use App\Http\Requests\StorePersonaRequest;
 use App\Http\Requests\UpdatePersonaRequest;
 use App\Models\Persona;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PersonaController extends Controller
@@ -75,5 +76,60 @@ class PersonaController extends Controller
         return redirect()
             ->route('personas.index')
             ->with('success', 'Persona eliminada exitosamente.');
+    }
+
+    public function deactivate(Persona $persona): RedirectResponse
+    {
+        $this->authorize('delete', $persona);
+
+        $persona->delete();
+
+        return redirect()->back()->with('success', 'Persona desactivada exitosamente.');
+    }
+
+    public function restore(Persona $persona): RedirectResponse
+    {
+        $this->authorize('restore', $persona);
+
+        $persona->restore();
+
+        return redirect()->back()->with('success', 'Persona reactivada exitosamente.');
+    }
+
+    public function aplicarInteresBatch(Request $request, Persona $persona): RedirectResponse
+    {
+        $rate = (float) $request->input('tasa', 5);
+        $fechaDesde = $request->input('fecha_desde');
+        $fechaHasta = $request->input('fecha_hasta');
+
+        $persona->update(['tasa_interes' => $rate]);
+
+        $query = $persona->consignaciones();
+
+        if ($fechaDesde) {
+            $query->where('fecha_consignacion', '>=', $fechaDesde);
+        }
+        if ($fechaHasta) {
+            $query->where('fecha_consignacion', '<=', $fechaHasta);
+        }
+
+        $consignaciones = $query->get();
+
+        foreach ($consignaciones as $consig) {
+            $interes = round($consig->valor_consignado * ($rate / 100), 2);
+            $consig->update([
+                'tasa_aplicada' => $rate,
+                'interes_aplicado' => $interes,
+                'total_con_interes' => round($consig->valor_consignado + $interes, 2),
+                'interes_aplicado_by' => auth()->id(),
+                'interes_aplicado_at' => now(),
+            ]);
+        }
+
+        $count = $consignaciones->count();
+
+        return redirect()->back()->with('success', $count === 1
+            ? "Interés del {$rate}% aplicado a 1 consignación."
+            : "Interés del {$rate}% aplicado a {$count} consignaciones.");
     }
 }

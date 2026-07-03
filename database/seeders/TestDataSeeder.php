@@ -11,11 +11,13 @@ class TestDataSeeder extends Seeder
 {
     public function run(): void
     {
-        $secretaria = User::create([
-            'name' => 'Secretaria',
-            'email' => 'secretaria@xiands.com',
-            'password' => bcrypt('password'),
-        ]);
+        $secretaria = User::firstOrCreate(
+            ['email' => 'secretaria@xiands.com'],
+            [
+                'name' => 'Secretaria',
+                'password' => bcrypt('password'),
+            ]
+        );
         $secretaria->assignRole('secretaria');
 
         $admin = User::where('email', 'admin@xiands.com')->first();
@@ -89,7 +91,10 @@ class TestDataSeeder extends Seeder
 
         foreach ($personas as $data) {
             $data['created_by'] = $admin->id;
-            Persona::create($data);
+            Persona::firstOrCreate(
+                ['cedula' => $data['cedula']],
+                $data
+            );
         }
 
         $todasPersonas = Persona::all();

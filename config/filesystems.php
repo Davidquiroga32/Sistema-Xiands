@@ -15,7 +15,7 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
-    'comprobantes_disk' => env('FILESYSTEM_COMPROBANTES', 'local'),
+    'comprobantes_disk' => env('FILESYSTEM_COMPROBANTES', 'public'),
 
     /*
     |--------------------------------------------------------------------------

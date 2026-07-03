@@ -1,7 +1,7 @@
 # AGENTS.md — XIANDS
 
 > Mobile-first Laravel app for managing consignaciones (consignments) to registered persons.
-> Stack: Laravel 13 · Livewire 4 · Blade · Tailwind CSS 3 · Alpine.js · Spatie Permission
+> Stack: Laravel 13 · Livewire 4 · Blade · Tailwind CSS 3 · Alpine.js · Spatie Permission · Laravel Auditing
 
 ---
 
@@ -11,94 +11,98 @@
 # First-time setup (install deps, create .env, key, migrate, build)
 composer setup
 
-# Dev server (runs server + queue + logs + vite concurrently)
+# Dev server (runs artisan serve + queue + logs + vite concurrently)
 composer dev
 
 # Run all tests (uses SQLite :memory: — no MySQL needed)
-php artisan test
-# Single test file
+composer test
+# Single test
 php artisan test --filter=ExampleTest
 
 # Lint PHP
 ./vendor/bin/pint
-# or: php artisan pint (if registered)
 
 # Frontend
 npm run dev        # Vite dev server with HMR
 npm run build      # Production build
 
-# Migrate + seed (creates roles: administradora, secretaria + admin@xiands.com / password)
+# Migrate + seed (RoleSeeder, AdminSeeder, TestDataSeeder)
 php artisan migrate:fresh --seed
-
-# Make a Livewire component (SFC with ⚡ emoji prefix by default)
-php artisan make:livewire NombreComponente
 ```
+
+---
 
 ## Architecture
 
-- **App code** is in `xiands-app/`. All commands run from that directory.
-- **Root level** contains prototyping HTML files (`01-login.html`, etc.) and `agent.md` (the original spec/requirements doc — useful reference but its version info is outdated; actual stack is newer).
-- **Frontend is Blade + Livewire SFC**, not a JavaScript SPA. Livewire 4 SFC components live at `resources/views/components/⚡*.blade.php` (emoji prefix convention).
-- **Livewire class namespace**: `App\Livewire`
-- **Livewire component locations**: `resources/views/components` and `resources/views/livewire`
+- Standard Laravel structure — controllers talk directly to Eloquent models. Only one service class: `app/Services/OcrService.php`.
+- **Frontend is Blade + Livewire**, not a JS SPA. There is one Livewire SFC: `resources/views/components/buscar-persona.blade.php` (anonymous class). Everything else in `components/` is a plain Blade component.
+- Three main resource areas: **Personas** (`PersonaController`), **Consignaciones** (`ConsignacionController`), **Reportes** (`ReporteController`, admin-only).
+- Auth routes (Breeze) are in `routes/auth.php`.
 
-## Key conventions
+### Routing (`routes/web.php`)
 
-### Styling
-- **Custom dark theme** — not standard Tailwind utility-first. Most styling uses custom CSS classes (`.btn-primary-dark`, `.card-dark`, `.input-dark`, `.label-dark`, etc.) and CSS variables (`--silver`, `--border`, `--card`, etc.) defined in `resources/css/app.css`.
-- Every form input needs a `<label>` above it — never use placeholder as label substitute (mobile-first rule).
-- Buttons must be at least `48px` tall (touch target).
-- Bottom nav bar is always visible on mobile (`x-bottom-nav` component). Desktop would use sidebar but that's not implemented yet.
+- `Route::resource('consignaciones', ...)->parameters(['consignaciones' => 'consignacion'])` — the bound parameter is `$consignacion` (singular), not `$consignaciones`.
+- `POST consignaciones/{consignacion}/interes` — apply 5% interest. Restricted to `role:administradora`.
+- All `reportes/*` routes are behind `role:administradora` middleware.
+- `GET comprobantes/{consignacion}` redirects to a temporary signed URL; does not serve the file directly.
+- `POST ocr/procesar` — runs OCR on an uploaded comprobante image to prefill the consignacion form.
 
-### Routing
-- Route model binding for `consignaciones` uses explicit parameter mapping: `Route::resource('consignaciones', ...)->parameters(['consignaciones' => 'consignacion'])`. So in controllers, the parameter is `$consignacion`, not `$consignaciones`.
-- Auth routes are in `routes/auth.php` (Laravel Breeze).
+### Data model
 
-### Database
-- All models use **ULID** primary keys (`HasUlids` trait), not auto-increment. Foreign keys use `foreignUlid()`.
-- All models use `SoftDeletes`.
-- Roles: `administradora` and `secretaria`. Created by `RoleSeeder`.
-- Default admin: `admin@xiands.com` / `password` (via `AdminSeeder`).
+- All models use **ULID** primary keys (`HasUlids`). Foreign keys use `foreignUlid()`.
+- `Persona` and `Consignacion` use `SoftDeletes` and implement `Auditable` (Owen-IT) — writes to `audits` table, visible in Reportes audit log.
+- `User` does **not** use `SoftDeletes`.
+- `Consignacion belongsTo Persona`. Interest fields (`interes_aplicado`, `total_con_interes`, `interes_aplicado_by`, `interes_aplicado_at`) are only set by `aplicarInteres()` with a hardcoded 5% rate — interest cannot be edited from the update form.
+- Roles: `administradora` (full access — delete, reports, apply interest) and `secretaria` (everything else). Seeded by `RoleSeeder`; default admin: `admin@xiands.com` / `password` (via `AdminSeeder`).
 
-### Permissions
-- Only `administradora` role can apply interest (`POST consignaciones/{consignacion}/interes`) — enforced via `middleware('role:administradora')`.
-- Only `administradora` should be able to delete records and access reports (not yet enforced via policies for delete — this is a TODO).
+### File storage (comprobantes)
 
-## What's built vs. not built
+- Uploaded comprobantes go to the disk in `config('filesystems.comprobantes_disk')` (env `FILESYSTEM_COMPROBANTES`). Default disk is `b2` (Backblaze B2 via S3-compatible driver).
+- `ConsignacionController::disk()` falls back to `local` if the `b2` disk has no key configured. Do **not** assume B2 is always available.
+- Comprobante view URLs are always temporary signed URLs (`Storage::disk(...)->temporaryUrl(...)`), generated on-read, never persisted.
 
-### Built
-- DB schema: personas, consignaciones, users, permission tables
-- Models: Persona, Consignacion, User (with Spatie HasRoles)
-- CRUD controllers: PersonaController, ConsignacionController
-- DashboardController with KPIs
-- Form Requests with validation
-- Views: Dashboard, Personas (index/show/create/edit), Consignaciones (index/create/show — **edit view is missing**)
-- Livewire component: `⚡buscar-persona` (person search with debounce, inline rendering in personas index)
-- Layouts: `app.blade.php` (mobile-first with top bar + bottom nav + FAB), `auth.blade.php`, `guest.blade.php`
-- Profile edit (Breeze)
-- Seeders: RoleSeeder, AdminSeeder
+### OCR (`app/Services/OcrService.php`)
 
-### Not yet built (from spec)
-- Consignaciones `edit.blade.php` view
-- Reportes module (controller, views, bottom nav "Reportes" tab is a dead `#` link)
-- PDF export (barryvdh/laravel-dompdf — not installed)
-- Excel export (Maatwebsite/Laravel-Excel — not installed)
-- OCR service for comprobantes
-- ComprobanteController (signed URLs for viewing)
-- Policies (PersonaPolicy, ConsignacionPolicy)
-- Audit trail (OwenIt/Laravel-Auditing — not installed)
-- Cloudflare R2 integration (currently using local storage driver)
-- Toast/notification component
-- Bottom sheet component
-- Skeleton loader component
+- Dispatches on `config('services.ocr.engine')`: `tesseract` (needs Tesseract binary installed on host) or `google_vision` (stub, always returns `null`). Default is `none` — OCR does nothing unless explicitly configured.
+- Regex-based parsing extracts date, monetary value, Colombian bank names, and reference numbers from raw OCR text.
 
-## Test conventions
-- Tests use SQLite `:memory:` (configured in `phpunit.xml`). Migrations run automatically via `RefreshDatabase` trait.
-- Test namespace: `Tests\` (PSR-4 from `tests/`)
-- `composer test` clears config cache first to avoid stale cached config breaking SQLite tests.
+### Policies
+
+- `PersonaPolicy` and `ConsignacionPolicy` exist. `viewAny`/`view`/`create`/`update` return `true` for any authenticated user. `delete`/`restore`/`forceDelete` require `administradora` role.
+- Policies are only explicitly enforced in `destroy()` methods via `$this->authorize('delete', ...)`. Other actions rely on route-level `role:` middleware.
+
+### Export (Reportes)
+
+- PDF via `barryvdh/laravel-dompdf`; Excel via `maatwebsite/excel`. Both accept `tipo` (`consignaciones`|`personas`) and optional `fecha_desde`/`fecha_hasta` filters (applied only to consignaciones export).
+
+---
+
+## Styling conventions
+
+- **Custom dark theme** — most styles use CSS classes defined in `resources/css/app.css` (`@layer components`): `.btn-primary-dark`, `.card-dark`, `.input-dark`, `.label-dark`, etc., plus CSS variables (`--black`, `--card`, `--border`, `--silver*`, `--accent`) in `:root`. Do not rely on utility-first Tailwind for component styling.
+- Every form input needs a visible `<label>` above it — placeholder is never a label substitute.
+- Interactive buttons must be at least `48px` tall (touch target) — `.btn` base class enforces `min-height: 48px`.
+- Bottom nav bar (`x-bottom-nav`) is always visible on mobile. No desktop sidebar yet.
+- Blade component library for this project: `toast`, `bottom-sheet`, `skeleton`, `money-input`, `modal` (in `resources/views/components/`).
+
+---
+
+## Testing
+
+- `phpunit.xml` forces SQLite `:memory:`, array cache/session, sync queue. Tests never touch MySQL config.
+- `composer test` clears cached config first (`config:clear`) — always use this over bare `php artisan test` if config may be stale.
+- Only Breeze auth/profile tests exist (`tests/Feature/Auth/`, `tests/Feature/ProfileTest.php`). No feature tests for Personas, Consignaciones, or Reportes yet.
+
+---
 
 ## Environment notes
-- `.env` is set for MySQL (`DB_DATABASE=xiands`, `DB_USERNAME=root`, empty password). Change as needed.
-- Session, cache, and queue drivers all use the `database` driver — tables are auto-created by migrations.
-- Default locale: Spanish (`es`), faker locale: `es_CO`.
-- Queue worker is started by `composer dev` (runs `queue:listen`). If running artisan serve manually, start the queue separately if using async features.
+
+- `.env.example` defaults to `DB_CONNECTION=sqlite`. Local development `.env` typically uses MySQL (`xiands` / `root` / empty password).
+- Session, cache, and queue drivers use `database` in normal operation. The queue worker runs via `composer dev` (`queue:listen`). If running `artisan serve` manually, start the queue worker separately.
+- App locale is Spanish (`es`), Faker locale is `es_CO`.
+
+---
+
+## Related files
+
+- `CLAUDE.md` — companion doc with additional detail on OcrService parsing, export classes, and view structure. Useful reference.

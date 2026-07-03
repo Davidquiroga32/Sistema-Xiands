@@ -96,7 +96,7 @@
         }
     </style>
 </head>
-<body class="overflow-hidden">
+<body>
     <div class="ambient-bg"></div>
     <div class="grid-bg"></div>
 

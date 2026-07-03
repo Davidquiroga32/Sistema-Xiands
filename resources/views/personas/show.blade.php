@@ -104,9 +104,13 @@
                                 <span>&middot;</span>
                                 <span>{{ $consig->observacion ? Str::limit($consig->observacion, 25) : 'Sin ref.' }}</span>
                             </div>
-                            @if ($consig->interes_aplicado)
+                            @if ($consig->interes_aplicado > 0)
+                                @php $tasa = $consig->tasa_aplicada ?? ($persona->tasa_interes ?? null); @endphp
                                 <div style="font-size:0.7rem;color:#7a9a7a;margin-top:0.3rem;">
                                     +{{ '$ ' . number_format($consig->interes_aplicado, 0, ',', '.') }} inter&eacute;s
+                                    @if ($tasa)
+                                        <span>({{ $tasa }}%)</span>
+                                    @endif
                                 </div>
                             @endif
                         </div>
@@ -167,6 +171,26 @@
                 <div class="label-dark" style="margin-bottom:0.3rem;">Estado</div>
                 <div style="font-size:0.88rem;color:{{ $persona->deleted_at ? 'var(--silver-dark)' : '#7ab87a' }};font-weight:500;">{{ $persona->deleted_at ? 'Inactivo' : 'Activo' }}</div>
             </div>
+            @if (Auth::user()->hasRole('administradora') || Auth::user()->hasRole('admin'))
+                <div class="card-dark" style="padding:0.85rem 0.9rem;grid-column:1/-1;">
+                    <div class="label-dark" style="margin-bottom:0.5rem;">Administraci&oacute;n</div>
+                    @if ($persona->deleted_at)
+                        <form method="POST" action="{{ route('personas.restore', $persona) }}">
+                            @csrf
+                            <button type="submit" class="btn-primary-dark" style="padding:0.7rem 1rem;font-size:0.78rem;background:linear-gradient(135deg,#1e3a1e,#2a4a2a);">
+                                Reactivar persona
+                            </button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('personas.deactivate', $persona) }}">
+                            @csrf
+                            <button type="submit" class="btn-primary-dark" style="padding:0.7rem 1rem;font-size:0.78rem;background:linear-gradient(135deg,#3a1e1e,#4a2a2a);">
+                                Desactivar persona
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            @endif
             <div class="card-dark" style="padding:0.85rem 0.9rem;">
                 <div class="label-dark" style="margin-bottom:0.3rem;">Categor&iacute;a</div>
                 <div style="font-size:0.88rem;color:var(--silver-bright);font-weight:500;">{{ $numeroConsignaciones >= 10 ? 'Alto valor' : 'Regular' }}</div>
@@ -230,27 +254,45 @@
         </div>
 
         @if (Auth::user()->hasRole('administradora') || Auth::user()->hasRole('admin'))
-            <div class="card-dark" style="padding:1.2rem;margin-top:0.6rem;border-color:var(--border-lit);" x-data="{ rate: 2.5 }">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-                    <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:600;color:var(--silver-bright);letter-spacing:0.05em;">Tasa de Inter&eacute;s</div>
-                    <div style="padding:0.3rem 0.8rem;border-radius:100px;background:rgba(180,180,180,0.08);border:1px solid var(--border-lit);font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:700;color:var(--silver-bright);" x-text="rate + '%'"></div>
+            <form method="POST" action="{{ route('personas.interes-batch', $persona) }}" x-data="{ rate: {{ $persona->tasa_interes ?? 5 }} }">
+                @csrf
+                <div class="card-dark" style="padding:1.2rem;margin-top:0.6rem;border-color:var(--border-lit);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                        <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:600;color:var(--silver-bright);letter-spacing:0.05em;">Tasa de Inter&eacute;s</div>
+                        <div style="padding:0.3rem 0.8rem;border-radius:100px;background:rgba(180,180,180,0.08);border:1px solid var(--border-lit);font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:700;color:var(--silver-bright);" x-text="rate + '%'"></div>
+                    </div>
+                    <input type="hidden" name="tasa" x-bind:value="rate">
+                    <div style="margin-bottom:0.8rem;">
+                        <input type="range" min="0.5" max="10" step="0.5" x-model="rate"
+                               style="width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--silver) 0%,var(--silver) calc(var(--pos) * 1%),var(--border-lit) calc(var(--pos) * 1%),var(--border-lit) 100%);outline:none;cursor:pointer;"
+                               :style="'--pos:' + ((rate - 0.5) / 9.5 * 100)">
+                    </div>
+                    <div style="display:flex;gap:0.4rem;margin-bottom:1rem;">
+                        <button type="button" @click="rate = 1" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--silver-dark);font-family:'Inter',sans-serif;font-size:0.7rem;cursor:pointer;transition:all 0.2s;" :style="rate === 1 ? 'border-color:var(--silver-dark);color:var(--silver-light);background:rgba(255,255,255,0.04);' : ''">1%</button>
+                        <button type="button" @click="rate = 2.5" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--silver-dark);font-family:'Inter',sans-serif;font-size:0.7rem;cursor:pointer;transition:all 0.2s;" :style="rate === 2.5 ? 'border-color:var(--silver-dark);color:var(--silver-light);background:rgba(255,255,255,0.04);' : ''">2.5%</button>
+                        <button type="button" @click="rate = 5" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--silver-dark);font-family:'Inter',sans-serif;font-size:0.7rem;cursor:pointer;transition:all 0.2s;" :style="rate === 5 ? 'border-color:var(--silver-dark);color:var(--silver-light);background:rgba(255,255,255,0.04);' : ''">5%</button>
+                        <button type="button" @click="rate = 7.5" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--silver-dark);font-family:'Inter',sans-serif;font-size:0.7rem;cursor:pointer;transition:all 0.2s;" :style="rate === 7.5 ? 'border-color:var(--silver-dark);color:var(--silver-light);background:rgba(255,255,255,0.04);' : ''">7.5%</button>
+                    </div>
+                    <div style="font-size:0.6rem;color:var(--silver-dark);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem;">Aplicar a consignaciones</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.8rem;">
+                        <div>
+                            <label class="label-dark" style="font-size:0.55rem;">Desde</label>
+                            <input type="date" name="fecha_desde" class="input-dark" style="color-scheme:dark;font-size:0.75rem;padding:0.5rem;">
+                        </div>
+                        <div>
+                            <label class="label-dark" style="font-size:0.55rem;">Hasta</label>
+                            <input type="date" name="fecha_hasta" class="input-dark" style="color-scheme:dark;font-size:0.75rem;padding:0.5rem;">
+                        </div>
+                    </div>
+                    <div style="font-size:0.55rem;color:var(--silver-dark);margin-bottom:0.6rem;">Deja las fechas vac&iacute;as para aplicar a todas.</div>
+                    <button type="submit" style="width:100%;margin-top:0.2rem;padding:0.75rem;border-radius:10px;background:linear-gradient(135deg,#2a2a2a,#3a3a3a);border:1px solid var(--border-lit);color:var(--white);font-family:'Outfit',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;">
+                        Guardar tasa de inter&eacute;s
+                    </button>
                 </div>
-                <div style="margin-bottom:0.8rem;">
-                    <input type="range" min="0.5" max="10" step="0.5" x-model="rate" value="2.5"
-                           style="width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--silver) 0%,var(--silver) calc((var(--pos,25) * 1%)),var(--border-lit) calc((var(--pos,25) * 1%)),var(--border-lit) 100%);outline:none;cursor:pointer;"
-                           :style="'--pos:' + ((rate - 0.5) / 9.5 * 100)">
-                </div>
-                <div style="display:flex;gap:0.4rem;">
-                    <button type="button" @click="rate = 1" class="preset-btn" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--silver-dark);font-family:'Inter',sans-serif;font-size:0.7rem;cursor:pointer;transition:all 0.2s;" :style="rate === 1 ? 'border-color:var(--silver-dark);color:var(--silver-light);background:rgba(255,255,255,0.04);' : ''">1%</button>
-                    <button type="button" @click="rate = 2.5" class="preset-btn" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--silver-dark);font-family:'Inter',sans-serif;font-size:0.7rem;cursor:pointer;transition:all 0.2s;" :style="rate === 2.5 ? 'border-color:var(--silver-dark);color:var(--silver-light);background:rgba(255,255,255,0.04);' : ''">2.5%</button>
-                    <button type="button" @click="rate = 5" class="preset-btn" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--silver-dark);font-family:'Inter',sans-serif;font-size:0.7rem;cursor:pointer;transition:all 0.2s;" :style="rate === 5 ? 'border-color:var(--silver-dark);color:var(--silver-light);background:rgba(255,255,255,0.04);' : ''">5%</button>
-                    <button type="button" @click="rate = 7.5" class="preset-btn" style="flex:1;padding:0.4rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--silver-dark);font-family:'Inter',sans-serif;font-size:0.7rem;cursor:pointer;transition:all 0.2s;" :style="rate === 7.5 ? 'border-color:var(--silver-dark);color:var(--silver-light);background:rgba(255,255,255,0.04);' : ''">7.5%</button>
-                </div>
-                <button type="button" style="width:100%;margin-top:0.8rem;padding:0.75rem;border-radius:10px;background:linear-gradient(135deg,#2a2a2a,#3a3a3a);border:1px solid var(--border-lit);color:var(--white);font-family:'Outfit',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;">
-                    Guardar tasa de inter&eacute;s
-                </button>
-            </div>
+            </form>
         @endif
+
+
     </div>
 
     {{-- BOTTOM SHEET: NUEVA CONSIGNACION --}}
@@ -260,7 +302,7 @@
             <div style="width:36px;height:4px;border-radius:2px;background:var(--border-lit);margin:0 auto 1.5rem;"></div>
             <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:600;letter-spacing:0.05em;color:var(--silver-bright);margin-bottom:1.2rem;">Nueva Consignaci&oacute;n</div>
 
-            <form method="POST" action="{{ route('consignaciones.store') }}">
+            <form method="POST" action="{{ route('consignaciones.store') }}" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="persona_id" value="{{ $persona->id }}">
 
@@ -274,6 +316,11 @@
                 <div style="margin-bottom:1rem;">
                     <label class="label-dark" style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--silver-dark);margin-bottom:0.4rem;display:block;">Fecha</label>
                     <input type="date" name="fecha_consignacion" class="input-dark" value="{{ now()->format('Y-m-d') }}" required style="font-size:0.9rem;">
+                </div>
+
+                <div style="margin-bottom:1rem;">
+                    <label class="label-dark" style="font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--silver-dark);margin-bottom:0.4rem;display:block;">Comprobante</label>
+                    <input type="file" name="comprobante" accept="image/*,application/pdf" capture="environment" class="input-dark" style="padding:0.7rem 1rem;">
                 </div>
 
                 <div style="margin-bottom:1rem;">

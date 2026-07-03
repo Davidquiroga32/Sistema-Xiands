@@ -14,20 +14,29 @@
     <div style="padding:0 1.25rem 1.2rem;">
         <div class="card-dark" style="padding:0.4rem;display:flex;gap:0.3rem;">
             <button @click="activeTab = 'exportar'"
-                class="flex-1 text-center py-3 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer"
+                class="flex-1 text-center py-3 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer inline-flex items-center justify-center gap-2"
                 style="border:none;font-family:'Inter',sans-serif;font-size:0.78rem;letter-spacing:0.05em;"
                 :style="activeTab === 'exportar'
                     ? 'background:linear-gradient(135deg,#2a2a2a,#3a3a3a);color:var(--silver-bright);box-shadow:0 2px 8px rgba(0,0,0,0.3);'
                     : 'background:transparent;color:var(--silver-dark);'">
-                &#9632;&nbsp;Exportar
+                <svg style="width:1rem;height:1rem;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3v11"/>
+                    <path d="M8 10.5 12 14.5l4-4"/>
+                    <path d="M4.5 16.5V19a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-2.5"/>
+                </svg>
+                Exportar
             </button>
             <button @click="activeTab = 'auditoria'"
-                class="flex-1 text-center py-3 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer"
+                class="flex-1 text-center py-3 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer inline-flex items-center justify-center gap-2"
                 style="border:none;font-family:'Inter',sans-serif;font-size:0.78rem;letter-spacing:0.05em;"
                 :style="activeTab === 'auditoria'
                     ? 'background:linear-gradient(135deg,#2a2a2a,#3a3a3a);color:var(--silver-bright);box-shadow:0 2px 8px rgba(0,0,0,0.3);'
                     : 'background:transparent;color:var(--silver-dark);'">
-                &#9650;&nbsp;Auditor&iacute;a
+                <svg style="width:1rem;height:1rem;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v5l3.3 2"/>
+                </svg>
+                Auditor&iacute;a
             </button>
         </div>
     </div>
@@ -101,8 +110,14 @@
                     <input type="hidden" name="tipo" x-bind:value="exportTipo">
                     <input type="hidden" name="fecha_desde" x-bind:value="fechaDesde">
                     <input type="hidden" name="fecha_hasta" x-bind:value="fechaHasta">
-                    <button type="submit" class="btn-primary-dark" style="padding:0.85rem;font-size:0.78rem;">
-                        &#9671; Descargar PDF
+                    <button type="submit" class="btn-primary-dark inline-flex items-center justify-center gap-2" style="padding:0.85rem;font-size:0.78rem;">
+                        <svg style="width:1rem;height:1rem;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5A1.5 1.5 0 0 1 7 3.5Z"/>
+                            <path d="M14 3.5V8h4"/>
+                            <path d="M9 13h6"/>
+                            <path d="M9 16h4"/>
+                        </svg>
+                        Descargar PDF
                     </button>
                 </form>
 
@@ -110,8 +125,14 @@
                     <input type="hidden" name="tipo" x-bind:value="exportTipo">
                     <input type="hidden" name="fecha_desde" x-bind:value="fechaDesde">
                     <input type="hidden" name="fecha_hasta" x-bind:value="fechaHasta">
-                    <button type="submit" class="btn-primary-dark" style="padding:0.85rem;font-size:0.78rem;">
-                        &#9651; Descargar Excel
+                    <button type="submit" class="btn-primary-dark inline-flex items-center justify-center gap-2" style="padding:0.85rem;font-size:0.78rem;">
+                        <svg style="width:1rem;height:1rem;flex-shrink:0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3.5" y="4.5" width="17" height="15" rx="1.5"/>
+                            <path d="M3.5 9.5h17"/>
+                            <path d="M9 9.5V20"/>
+                            <path d="M15 9.5V20"/>
+                        </svg>
+                        Descargar Excel
                     </button>
                 </form>
             </div>
@@ -132,8 +153,8 @@
 
             <div style="display:flex;flex-direction:column;gap:0.45rem;">
                 @forelse ($auditoria as $audit)
-                    <div style="padding:0.75rem 0.9rem;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;transition:border-color 0.2s;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
+                    <div x-data="{ open: false }" style="padding:0.75rem 0.9rem;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;transition:border-color 0.2s;">
+                        <div @click="open = !open" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
                             @php
                                 $eventColors = [
                                     'created' => '#7ab87a',
@@ -160,7 +181,7 @@
                                 {{ $label }}
                             </span>
                         </div>
-                        <div style="font-size:0.66rem;color:var(--silver-dark);display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                        <div @click="open = !open" style="cursor:pointer;font-size:0.66rem;color:var(--silver-dark);display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
                             <span>{{ $audit->created_at->format('d M H:i') }}</span>
                             <span style="color:var(--border-lit);">&middot;</span>
                             <span style="color:var(--silver);">{{ $audit->user?->name ?? 'Sistema' }}</span>
@@ -169,10 +190,51 @@
                                 <span style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $audit->url }}</span>
                             @endif
                         </div>
+                        @php
+                            $oldValues = $audit->old_values ?? [];
+                            $newValues = $audit->new_values ?? [];
+                        @endphp
+                        <div x-show="open" style="margin-top:0.6rem;padding-top:0.6rem;border-top:1px solid var(--border);">
+                            @if ($audit->event === 'created' && !empty($newValues))
+                                <div style="font-size:0.62rem;color:var(--silver-dark);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;">Valores creados</div>
+                                @foreach ($newValues as $campo => $valor)
+                                    <div style="display:flex;gap:0.5rem;font-size:0.68rem;padding:0.25rem 0;">
+                                        <span style="color:var(--silver-dark);min-width:80px;flex-shrink:0;">{{ $campo }}</span>
+                                        <span style="color:#7ab87a;">{{ is_scalar($valor) ? (is_bool($valor) ? ($valor ? 'Sí' : 'No') : $valor) : json_encode($valor) }}</span>
+                                    </div>
+                                @endforeach
+                            @elseif ($audit->event === 'deleted' && !empty($oldValues))
+                                <div style="font-size:0.62rem;color:var(--silver-dark);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;">Valores eliminados</div>
+                                @foreach ($oldValues as $campo => $valor)
+                                    <div style="display:flex;gap:0.5rem;font-size:0.68rem;padding:0.25rem 0;">
+                                        <span style="color:var(--silver-dark);min-width:80px;flex-shrink:0;">{{ $campo }}</span>
+                                        <span style="color:#c06060;">{{ is_scalar($valor) ? (is_bool($valor) ? ($valor ? 'Sí' : 'No') : $valor) : json_encode($valor) }}</span>
+                                    </div>
+                                @endforeach
+                            @elseif (($audit->event === 'updated' || $audit->event === 'restored') && !empty($oldValues) && !empty($newValues))
+                                <div style="font-size:0.62rem;color:var(--silver-dark);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;">Cambios</div>
+                                @foreach ($newValues as $campo => $nuevo)
+                                    @php $anterior = $oldValues[$campo] ?? null; @endphp
+                                    @if ($anterior !== $nuevo)
+                                        <div style="font-size:0.68rem;padding:0.3rem 0.4rem;margin-bottom:0.2rem;background:rgba(255,255,255,0.02);border-radius:6px;">
+                                            <div style="color:var(--silver);margin-bottom:0.15rem;">{{ $campo }}</div>
+                                            <div style="display:flex;gap:0.4rem;align-items:center;">
+                                                <span style="color:#c06060;font-size:0.62rem;">{{ is_scalar($anterior) ? (is_bool($anterior) ? ($anterior ? 'Sí' : 'No') : $anterior) : json_encode($anterior) }}</span>
+                                                <span style="color:var(--border-lit);">&rarr;</span>
+                                                <span style="color:#7ab87a;font-size:0.62rem;">{{ is_scalar($nuevo) ? (is_bool($nuevo) ? ($nuevo ? 'Sí' : 'No') : $nuevo) : json_encode($nuevo) }}</span>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </div>
                     </div>
                 @empty
                     <div style="text-align:center;padding:3rem 2rem;">
-                        <div style="font-size:2rem;color:var(--border-lit);margin-bottom:0.8rem;">&#9632;</div>
+                        <svg style="width:2rem;height:2rem;color:var(--border-lit);margin:0 auto 0.8rem;display:block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 7v5l3.3 2"/>
+                        </svg>
                         <p style="font-size:0.8rem;color:var(--silver-dark);line-height:1.5;">
                             No hay registros de auditor&iacute;a<br>disponibles a&uacute;n.
                         </p>

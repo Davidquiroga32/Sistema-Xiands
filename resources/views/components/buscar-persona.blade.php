@@ -9,9 +9,16 @@ new class extends Component
     use WithPagination;
 
     public string $search = '';
+    public string $filter = 'todos';
 
     public function updatingSearch(): void
     {
+        $this->resetPage();
+    }
+
+    public function setFilter(string $filter): void
+    {
+        $this->filter = $filter;
         $this->resetPage();
     }
 
@@ -25,6 +32,12 @@ new class extends Component
                   ->orWhere('cedula', 'like', '%' . $this->search . '%')
                   ->orWhere('direccion', 'like', '%' . $this->search . '%');
             });
+        }
+
+        if ($this->filter === 'activos') {
+            $query->whereHas('consignaciones');
+        } elseif ($this->filter === 'recientes') {
+            $query->where('created_at', '>=', now()->subDays(30));
         }
 
         $personas = $query->latest()->paginate(12);
@@ -57,9 +70,9 @@ new class extends Component
             @endif
         </div>
         <div class="filters-row">
-            <button class="filter-chip active">Todos</button>
-            <button class="filter-chip">Activos</button>
-            <button class="filter-chip">Recientes</button>
+            <button type="button" class="filter-chip {{ $filter === 'todos' ? 'active' : '' }}" wire:click="setFilter('todos')">Todos</button>
+            <button type="button" class="filter-chip {{ $filter === 'activos' ? 'active' : '' }}" wire:click="setFilter('activos')">Activos</button>
+            <button type="button" class="filter-chip {{ $filter === 'recientes' ? 'active' : '' }}" wire:click="setFilter('recientes')">Recientes</button>
         </div>
     </div>
 

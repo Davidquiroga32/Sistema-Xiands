@@ -16,9 +16,13 @@ class ConsignacionController extends Controller
     {
         $disk = config('filesystems.comprobantes_disk', 'b2');
 
-        // Fallback to local if B2 is not configured or unreachable
+        // Fallback to public if B2/Local is not configured or unreachable
         if ($disk === 'b2' && ! config('filesystems.disks.b2.key')) {
-            return 'local';
+            return 'public';
+        }
+
+        if ($disk === 'local') {
+            return 'public';
         }
 
         return $disk;
@@ -79,6 +83,18 @@ class ConsignacionController extends Controller
         }
 
         $consignacion = Consignacion::create($data);
+
+        $persona = $consignacion->persona;
+        if ($persona && $persona->tasa_interes > 0) {
+            $interes = round($consignacion->valor_consignado * ($persona->tasa_interes / 100), 2);
+            $consignacion->update([
+                'tasa_aplicada' => $persona->tasa_interes,
+                'interes_aplicado' => $interes,
+                'total_con_interes' => round($consignacion->valor_consignado + $interes, 2),
+                'interes_aplicado_by' => auth()->id(),
+                'interes_aplicado_at' => now(),
+            ]);
+        }
 
         return redirect()
             ->route('consignaciones.show', $consignacion)
@@ -141,6 +157,7 @@ class ConsignacionController extends Controller
         $interes = round($consignacion->valor_consignado * 0.05, 2);
 
         $consignacion->update([
+            'tasa_aplicada' => 5.00,
             'interes_aplicado' => $interes,
             'total_con_interes' => round($consignacion->valor_consignado + $interes, 2),
             'interes_aplicado_by' => auth()->id(),

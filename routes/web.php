@@ -19,6 +19,18 @@ Route::get('/dashboard', fn () => redirect()->route('dashboard'));
 Route::resource('personas', PersonaController::class)
     ->middleware('auth');
 
+Route::post('personas/{persona}/deactivate', [PersonaController::class, 'deactivate'])
+    ->middleware(['auth', 'role:administradora'])
+    ->name('personas.deactivate');
+
+Route::post('personas/{persona}/restore', [PersonaController::class, 'restore'])
+    ->middleware(['auth', 'role:administradora'])
+    ->name('personas.restore');
+
+Route::post('personas/{persona}/interes-batch', [PersonaController::class, 'aplicarInteresBatch'])
+    ->middleware(['auth', 'role:administradora'])
+    ->name('personas.interes-batch');
+
 // Consignaciones
 Route::resource('consignaciones', ConsignacionController::class)
     ->parameters(['consignaciones' => 'consignacion'])
