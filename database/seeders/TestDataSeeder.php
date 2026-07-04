@@ -91,7 +91,7 @@ class TestDataSeeder extends Seeder
 
         foreach ($personas as $data) {
             $data['created_by'] = $admin->id;
-            Persona::firstOrCreate(
+            Persona::updateOrCreate(
                 ['cedula' => $data['cedula']],
                 $data
             );
