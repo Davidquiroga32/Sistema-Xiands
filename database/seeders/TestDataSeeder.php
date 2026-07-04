@@ -89,12 +89,13 @@ class TestDataSeeder extends Seeder
             ],
         ];
 
+        if (Persona::count() > 0) {
+            return;
+        }
+
         foreach ($personas as $data) {
             $data['created_by'] = $admin->id;
-            Persona::updateOrCreate(
-                ['cedula' => $data['cedula']],
-                $data
-            );
+            Persona::create($data);
         }
 
         $todasPersonas = Persona::all();
