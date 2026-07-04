@@ -81,21 +81,57 @@
     </div>
 
     {{-- TAB: CONSIGNACIONES --}}
-    <div x-show="activeTab === 'consig'" x-transition.opacity style="padding:1rem 1.25rem;padding-bottom:calc(var(--bottom-nav-h) + 1.5rem);">
+    <div x-show="activeTab === 'consig'" x-transition.opacity
+         x-data="{ selectedIds: [], selectAll: false, bulkOpen: false, estadoBulk: 'finalizada' }"
+         style="padding:1rem 1.25rem;padding-bottom:calc(var(--bottom-nav-h) + 1.5rem);">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;">
             <h3 style="font-family:'Outfit',sans-serif;font-size:0.8rem;font-weight:600;letter-spacing:0.1em;color:var(--silver);text-transform:uppercase;">Historial</h3>
-            <button @click="newConsigOpen = true"
-                    style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;border-radius:10px;background:linear-gradient(135deg,#222,#333);border:1px solid var(--border-lit);color:var(--silver-bright);font-family:'Outfit',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;">
-                <span>&#43;</span> Nueva
-            </button>
+            <div style="display:flex;gap:0.5rem;">
+                <button @click="bulkOpen = true"
+                        style="display:flex;align-items:center;gap:0.3rem;padding:0.5rem 0.8rem;border-radius:10px;background:linear-gradient(135deg,#2a2a2a,#3a3a3a);border:1px solid var(--border-lit);color:var(--silver-bright);font-family:'Outfit',sans-serif;font-size:0.68rem;font-weight:600;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s;">
+                    <svg style="width:0.8rem;height:0.8rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2H2v10l9.3 9.3a1 1 0 0 0 1.4 0l6.6-6.6a1 1 0 0 0 0-1.4L12 2Z"/>
+                        <path d="M7 7h.01"/>
+                    </svg>
+                    Estado
+                    <span x-show="selectedIds.length > 0" x-text="selectedIds.length"
+                          style="background:var(--silver);color:var(--black);font-size:0.6rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;"></span>
+                </button>
+                <button @click="newConsigOpen = true"
+                        style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;border-radius:10px;background:linear-gradient(135deg,#222,#333);border:1px solid var(--border-lit);color:var(--silver-bright);font-family:'Outfit',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;">
+                    <span>&#43;</span> Nueva
+                </button>
+            </div>
         </div>
+
+        @php
+            $currentEstado = null;
+        @endphp
 
         <div style="display:flex;flex-direction:column;gap:0.55rem;">
             @forelse ($consignaciones as $i => $consig)
-                <a href="{{ route('consignaciones.show', $consig) }}" class="card-dark-hover" style="padding:0.9rem 1rem;text-decoration:none;display:block;position:relative;overflow:hidden;animation:fadeUpCard 0.4s {{ $i * 0.05 }}s ease both;">
-                    <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#555,#333);border-radius:2px 0 0 2px;"></div>
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding-left:0.3rem;">
-                        <div style="flex:1;">
+                @if ($currentEstado !== $consig->estado)
+                    @php $currentEstado = $consig->estado; @endphp
+                    <div style="padding:0.5rem 0 0.2rem;display:flex;align-items:center;gap:0.6rem;">
+                        <span style="font-size:0.58rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;
+                            {{ $consig->estado === 'vigente' ? 'color:#7ab87a;' : 'color:var(--silver-dark);' }}">
+                            {{ $consig->estado === 'vigente' ? 'En vigencia' : 'Finalizadas' }}
+                        </span>
+                        <span style="flex:1;height:1px;background:var(--border);"></span>
+                    </div>
+                @endif
+                <div class="card-dark-hover" style="padding:0.9rem 1rem;text-decoration:none;display:flex;align-items:center;gap:0.6rem;position:relative;overflow:hidden;animation:fadeUpCard 0.4s {{ $i * 0.05 }}s ease both;
+                    opacity:{{ $consig->estado === 'finalizada' ? '0.65' : '1' }};">
+                    <input type="checkbox"
+                           value="{{ $consig->id }}"
+                           x-model="selectedIds"
+                           x-bind:style="selectedIds.includes('{{ $consig->id }}')
+                               ? 'appearance:none;-webkit-appearance:none;width:20px;height:20px;min-width:20px;border:2px solid var(--silver);border-radius:5px;background:var(--silver);cursor:pointer;flex-shrink:0;position:relative;outline:none;'
+                               : 'appearance:none;-webkit-appearance:none;width:20px;height:20px;min-width:20px;border:2px solid #555;border-radius:5px;background:rgba(255,255,255,0.06);cursor:pointer;flex-shrink:0;position:relative;outline:none;'"
+                    >
+                    <a href="{{ route('consignaciones.show', $consig) }}" style="text-decoration:none;display:flex;flex:1;align-items:center;justify-content:space-between;min-width:0;">
+                        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,{{ $consig->estado === 'finalizada' ? '#444,#2a2a2a' : '#555,#333' }});border-radius:2px 0 0 2px;"></div>
+                        <div style="flex:1;padding-left:0.3rem;">
                             <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700;" class="gradient-text">
                                 {{ '$ ' . number_format($consig->valor_consignado, 0, ',', '.') }}
                             </div>
@@ -114,19 +150,63 @@
                                 </div>
                             @endif
                         </div>
-                        <div style="text-align:right;">
+                        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:0.3rem;">
+                            <span style="font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.15rem 0.45rem;border-radius:100px;font-weight:600;
+                                {{ $consig->estado === 'vigente' ? 'color:#7ab87a;background:rgba(74,154,74,0.12);border:1px solid rgba(74,154,74,0.25);' : 'color:var(--silver-dark);background:rgba(255,255,255,0.03);border:1px solid var(--border);' }}">
+                                {{ $consig->estado === 'vigente' ? 'Vigente' : 'Finalizada' }}
+                            </span>
                             <div style="font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--silver-dark);background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;padding:0.2rem 0.5rem;">
                                 {{ $consig->comprobante_tipo ? Str::limit($consig->comprobante_tipo, 10) : 'Efectivo' }}
                             </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                </div>
             @empty
                 <div style="text-align:center;padding:2rem 1rem;">
                     <div style="font-size:2rem;color:var(--border-lit);margin-bottom:1rem;">&#9671;</div>
                     <p style="font-size:0.8rem;color:var(--silver-dark);">Sin consignaciones registradas.</p>
                 </div>
             @endforelse
+        </div>
+
+        {{-- BULK BOTTOM SHEET --}}
+        <div x-show="bulkOpen" x-cloak @click.self="bulkOpen = false" @keydown.escape.window="bulkOpen = false"
+             style="position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.8);display:flex;align-items:flex-end;justify-content:center;">
+            <div style="width:100%;max-width:480px;background:#1a1a1a;border:1px solid #333;border-radius:24px 24px 0 0;padding:1.5rem 1.5rem 2.5rem;animation:slideUp 0.3s ease;">
+                <div style="width:36px;height:4px;border-radius:2px;background:#444;margin:0 auto 1.5rem;"></div>
+                <div style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:600;letter-spacing:0.05em;color:#e0e0e0;margin-bottom:0.5rem;">
+                    Cambiar estado de consignaciones
+                </div>
+                <div style="font-size:0.72rem;color:#888;margin-bottom:1.2rem;">
+                    <span x-text="selectedIds.length"></span> seleccionadas
+                </div>
+                <form method="POST" action="{{ route('personas.cambiar-estado', $persona) }}"
+                      x-on:submit.prevent="if(selectedIds.length === 0) return; $el.submit(); bulkOpen = false">
+                    @csrf
+                    <template x-for="id in selectedIds" :key="id">
+                        <input type="hidden" name="ids[]" x-bind:value="id">
+                    </template>
+                    <input type="hidden" name="estado" x-bind:value="estadoBulk">
+                    <div style="display:flex;gap:0.6rem;margin-bottom:1.2rem;">
+                        <div @click="estadoBulk = 'vigente'"
+                             style="flex:1;padding:0.85rem 0.5rem;border-radius:12px;border:2px solid #333;background:rgba(255,255,255,0.03);cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:0.3rem;transition:all 0.2s;"
+                             x-bind:style="estadoBulk === 'vigente' ? 'border-color:#6aaa6a;background:rgba(106,170,106,0.1);' : ''">
+                            <span style="font-size:0.75rem;font-weight:600;color:#6aaa6a;">&#9651; Vigente</span>
+                            <span style="font-size:0.55rem;color:#888;">Activa en c&aacute;lculos</span>
+                        </div>
+                        <div @click="estadoBulk = 'finalizada'"
+                             style="flex:1;padding:0.85rem 0.5rem;border-radius:12px;border:2px solid #333;background:rgba(255,255,255,0.03);cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:0.3rem;transition:all 0.2s;"
+                             x-bind:style="estadoBulk === 'finalizada' ? 'border-color:#666;background:rgba(255,255,255,0.06);' : ''">
+                            <span style="font-size:0.75rem;font-weight:600;color:#aaa;">&#9661; Finalizada</span>
+                            <span style="font-size:0.55rem;color:#888;">Solo historial</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:0.75rem;">
+                        <button type="button" @click="bulkOpen = false" class="btn-outline-dark">Cancelar</button>
+                        <button type="submit" class="btn-solid-dark" x-bind:disabled="selectedIds.length === 0">Aplicar</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         @if ($consignaciones->hasPages())
@@ -171,7 +251,7 @@
                 <div class="label-dark" style="margin-bottom:0.3rem;">Estado</div>
                 <div style="font-size:0.88rem;color:{{ $persona->deleted_at ? 'var(--silver-dark)' : '#7ab87a' }};font-weight:500;">{{ $persona->deleted_at ? 'Inactivo' : 'Activo' }}</div>
             </div>
-            @if (Auth::user()->hasRole('administradora') || Auth::user()->hasRole('admin'))
+            @if (Auth::user()->hasRole('administradora'))
                 <div class="card-dark" style="padding:0.85rem 0.9rem;grid-column:1/-1;">
                     <div class="label-dark" style="margin-bottom:0.5rem;">Administraci&oacute;n</div>
                     @if ($persona->deleted_at)
@@ -236,7 +316,7 @@
                     for ($m = 6; $m >= 0; $m--) {
                         $dt = now()->subMonths($m);
                         $months[] = $dt->translatedFormat('M');
-                        $val = $persona->consignaciones()->whereMonth('fecha_consignacion', $dt->month)->whereYear('fecha_consignacion', $dt->year)->sum('valor_consignado');
+                        $val = $persona->consignaciones()->vigente()->whereMonth('fecha_consignacion', $dt->month)->whereYear('fecha_consignacion', $dt->year)->sum('valor_consignado');
                         $monthVals[] = $val;
                     }
                     $maxVal = max($monthVals) ?: 1;
@@ -253,7 +333,7 @@
             </div>
         </div>
 
-        @if (Auth::user()->hasRole('administradora') || Auth::user()->hasRole('admin'))
+        @if (Auth::user()->hasRole('administradora'))
             <form method="POST" action="{{ route('personas.interes-batch', $persona) }}" x-data="{ rate: {{ $persona->tasa_interes ?? 5 }} }">
                 @csrf
                 <div class="card-dark" style="padding:1.2rem;margin-top:0.6rem;border-color:var(--border-lit);">

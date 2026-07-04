@@ -40,4 +40,9 @@ class Persona extends Model implements AuditableContract
     {
         return $this->hasMany(Consignacion::class);
     }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->withTrashed()->where($field ?? $this->getRouteKeyName(), $value)->firstOrFail();
+    }
 }

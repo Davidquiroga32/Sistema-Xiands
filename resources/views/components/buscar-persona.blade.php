@@ -9,7 +9,7 @@ new class extends Component
     use WithPagination;
 
     public string $search = '';
-    public string $filter = 'todos';
+    public string $filter = 'activos';
 
     public function updatingSearch(): void
     {
@@ -34,10 +34,10 @@ new class extends Component
             });
         }
 
-        if ($this->filter === 'activos') {
-            $query->whereHas('consignaciones');
+        if ($this->filter === 'desactivados') {
+            $query->onlyTrashed();
         } elseif ($this->filter === 'recientes') {
-            $query->where('created_at', '>=', now()->subDays(30));
+            $query->where('created_at', '>=', now()->subDays(8));
         }
 
         $personas = $query->latest()->paginate(12);
@@ -70,9 +70,9 @@ new class extends Component
             @endif
         </div>
         <div class="filters-row">
-            <button type="button" class="filter-chip {{ $filter === 'todos' ? 'active' : '' }}" wire:click="setFilter('todos')">Todos</button>
             <button type="button" class="filter-chip {{ $filter === 'activos' ? 'active' : '' }}" wire:click="setFilter('activos')">Activos</button>
-            <button type="button" class="filter-chip {{ $filter === 'recientes' ? 'active' : '' }}" wire:click="setFilter('recientes')">Recientes</button>
+            <button type="button" class="filter-chip {{ $filter === 'desactivados' ? 'active' : '' }}" wire:click="setFilter('desactivados')">Desactivados</button>
+            <button type="button" class="filter-chip {{ $filter === 'recientes' ? 'active' : '' }}" wire:click="setFilter('recientes')">&Uacute;ltimos 8 d&iacute;as</button>
         </div>
     </div>
 
@@ -110,7 +110,7 @@ new class extends Component
                     <div class="person-info">
                         <div class="person-name">{{ $persona->nombre_completo }}</div>
                         <div class="person-meta">
-                            <span class="status-dot active"></span>
+                            <span class="status-dot {{ $persona->deleted_at ? 'inactive' : 'active' }}"></span>
                             {{ $persona->cedula }}
                             &nbsp;·&nbsp;
                             <span>{{ $persona->direccion ? \Illuminate\Support\Str::words($persona->direccion, 2, '') : '—' }}</span>

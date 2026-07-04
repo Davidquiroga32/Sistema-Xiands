@@ -20,6 +20,7 @@ class Consignacion extends Model implements AuditableContract
         'valor_consignado',
         'fecha_consignacion',
         'observacion',
+        'estado',
         'comprobante_path',
         'comprobante_tipo',
         'tasa_aplicada',
@@ -54,5 +55,22 @@ class Consignacion extends Model implements AuditableContract
     public function interesAplicadoPor()
     {
         return $this->belongsTo(User::class, 'interes_aplicado_by');
+    }
+
+    public function scopeVigente($query)
+    {
+        return $query->where('estado', 'vigente');
+    }
+
+    public function scopeFinalizada($query)
+    {
+        return $query->where('estado', 'finalizada');
+    }
+
+    public function toggleEstado(): void
+    {
+        $this->update([
+            'estado' => $this->estado === 'vigente' ? 'finalizada' : 'vigente',
+        ]);
     }
 }

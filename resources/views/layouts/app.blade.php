@@ -124,10 +124,21 @@
         </a>
         <div class="top-title">@yield('page_title', '')</div>
         <div class="top-actions">
-            <a href="{{ route('profile.edit') }}" class="icon-btn" title="Perfil">&#9671;</a>
-            <form method="POST" action="{{ route('logout') }}" class="flex">
+            <a href="{{ route('profile.edit') }}" class="icon-btn" title="Perfil">
+                <svg style="width:1.1rem;height:1.1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <circle cx="12" cy="10.2" r="3.2"/>
+                    <path d="M6.2 19a6.2 6.2 0 0 1 11.6 0"/>
+                </svg>
+            </a>
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="icon-btn" title="Salir">&#10150;</button>
+                <button type="submit" class="icon-btn" title="Cerrar sesión" style="width:auto;padding:0 0.75rem;gap:0.4rem;display:flex;align-items:center;font-size:0.7rem;letter-spacing:0.05em;font-weight:500;">
+                    Cerrar sesión
+                    <svg style="width:0.9rem;height:0.9rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
             </form>
         </div>
     </header>

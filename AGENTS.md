@@ -19,7 +19,7 @@ composer test
 # Single test
 php artisan test --filter=ExampleTest
 
-# Lint PHP
+# Lint PHP (Laravel Pint — no custom pint.json, uses Laravel default preset)
 ./vendor/bin/pint
 
 # Frontend
@@ -37,7 +37,7 @@ php artisan migrate:fresh --seed
 - Standard Laravel structure — controllers talk directly to Eloquent models. Only one service class: `app/Services/OcrService.php`.
 - **Frontend is Blade + Livewire**, not a JS SPA. There is one Livewire SFC: `resources/views/components/buscar-persona.blade.php` (anonymous class). Everything else in `components/` is a plain Blade component.
 - Three main resource areas: **Personas** (`PersonaController`), **Consignaciones** (`ConsignacionController`), **Reportes** (`ReporteController`, admin-only).
-- Auth routes (Breeze) are in `routes/auth.php`.
+- Auth routes (Breeze + Google OAuth via Socialite) are in `routes/auth.php`.
 
 ### Routing (`routes/web.php`)
 
@@ -45,7 +45,10 @@ php artisan migrate:fresh --seed
 - `POST consignaciones/{consignacion}/interes` — apply 5% interest. Restricted to `role:administradora`.
 - All `reportes/*` routes are behind `role:administradora` middleware.
 - `GET comprobantes/{consignacion}` redirects to a temporary signed URL; does not serve the file directly.
-- `POST ocr/procesar` — runs OCR on an uploaded comprobante image to prefill the consignacion form.
+- `POST ocr/procesar` — runs OCR on an uploaded comprobante image to prefill the consignacion form. Handled by `ComprobanteController`, which also serves comprobante signed URLs.
+- `POST personas/{persona}/deactivate` — soft-deactivate a persona (admin only).
+- `POST personas/{persona}/restore` — restore a soft-deleted persona (admin only).
+- `POST personas/{persona}/interes-batch` — batch apply 5% interest to all consignaciones of a persona (admin only).
 
 ### Data model
 
@@ -57,13 +60,13 @@ php artisan migrate:fresh --seed
 
 ### File storage (comprobantes)
 
-- Uploaded comprobantes go to the disk in `config('filesystems.comprobantes_disk')` (env `FILESYSTEM_COMPROBANTES`). Default disk is `b2` (Backblaze B2 via S3-compatible driver).
-- `ConsignacionController::disk()` falls back to `local` if the `b2` disk has no key configured. Do **not** assume B2 is always available.
+- Uploaded comprobantes go to the disk in `config('filesystems.comprobantes_disk')` (env `FILESYSTEM_COMPROBANTES`). Default is `'public'` (local `storage/app/public`).
+- `ConsignacionController::disk()` has its own fallback default of `'b2'` via `config('filesystems.comprobantes_disk', 'b2')` — but since the config key always exists (defaults to `'public'`), this fallback is never reached unless you change the config. The method also falls back from `b2`→`public` (if no B2 key configured) and `local`→`public`. Do **not** assume B2 is always available.
 - Comprobante view URLs are always temporary signed URLs (`Storage::disk(...)->temporaryUrl(...)`), generated on-read, never persisted.
 
 ### OCR (`app/Services/OcrService.php`)
 
-- Dispatches on `config('services.ocr.engine')`: `tesseract` (needs Tesseract binary installed on host) or `google_vision` (stub, always returns `null`). Default is `none` — OCR does nothing unless explicitly configured.
+- Dispatches on `config('services.ocr.engine')`: `tesseract` (needs Tesseract binary installed on host + `thiagoalessio/tesseract-ocr` Composer package installed manually — it is **not** in `composer.json`) or `google_vision` (stub, always returns `null`). Default is `none` — OCR does nothing unless explicitly configured.
 - Regex-based parsing extracts date, monetary value, Colombian bank names, and reference numbers from raw OCR text.
 
 ### Policies

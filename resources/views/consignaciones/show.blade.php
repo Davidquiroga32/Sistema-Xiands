@@ -34,7 +34,13 @@
         @endif
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1rem;">
-            <div class="card-dark" style="padding:1rem 0.9rem;text-align:center;grid-column:1/-1;">
+            <div class="card-dark" style="padding:1rem 0.9rem;text-align:center;grid-column:1/-1;position:relative;">
+                <div style="position:absolute;top:0.5rem;right:0.7rem;">
+                    <span style="font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.55rem;border-radius:100px;font-weight:600;
+                        {{ $consignacion->estado === 'vigente' ? 'color:#7ab87a;background:rgba(74,154,74,0.12);border:1px solid rgba(74,154,74,0.25);' : 'color:var(--silver-dark);background:rgba(255,255,255,0.04);border:1px solid var(--border);' }}">
+                        {{ $consignacion->estado === 'vigente' ? 'Vigente' : 'Finalizada' }}
+                    </span>
+                </div>
                 <div style="font-family:'Outfit',sans-serif;font-size:1.8rem;font-weight:700;" class="gradient-text">
                     {{ '$ ' . number_format($consignacion->valor_consignado, 0, ',', '.') }}
                 </div>
@@ -121,5 +127,13 @@
                 el {{ $consignacion->interes_aplicado_at ? \Carbon\Carbon::parse($consignacion->interes_aplicado_at)->format('d M Y H:i') : '—' }}
             </div>
         @endif
+
+        <form method="POST" action="{{ route('consignaciones.toggle-estado', $consignacion) }}" style="margin-bottom:1rem;">
+            @csrf
+            <button type="submit" class="btn-primary-dark" style="padding:0.75rem;font-size:0.78rem;width:100%;
+                {{ $consignacion->estado === 'vigente' ? 'background:linear-gradient(135deg,#3a2e1e,#4a3a2a);' : 'background:linear-gradient(135deg,#1e3a1e,#2a4a2a);' }}">
+                {{ $consignacion->estado === 'vigente' ? 'Marcar como finalizada' : 'Marcar como vigente' }}
+            </button>
+        </form>
     </div>
 @endsection

@@ -31,6 +31,10 @@ Route::post('personas/{persona}/interes-batch', [PersonaController::class, 'apli
     ->middleware(['auth', 'role:administradora'])
     ->name('personas.interes-batch');
 
+Route::post('personas/{persona}/cambiar-estado', [PersonaController::class, 'cambiarEstadoBatch'])
+    ->middleware('auth')
+    ->name('personas.cambiar-estado');
+
 // Consignaciones
 Route::resource('consignaciones', ConsignacionController::class)
     ->parameters(['consignaciones' => 'consignacion'])
@@ -40,6 +44,11 @@ Route::resource('consignaciones', ConsignacionController::class)
 Route::post('consignaciones/{consignacion}/interes', [ConsignacionController::class, 'aplicarInteres'])
     ->middleware(['auth', 'role:administradora'])
     ->name('consignaciones.interes');
+
+// Cambiar estado de consignacion
+Route::post('consignaciones/{consignacion}/toggle-estado', [ConsignacionController::class, 'toggleEstado'])
+    ->middleware('auth')
+    ->name('consignaciones.toggle-estado');
 
 // Reportes (solo Administradora)
 Route::middleware(['auth', 'role:administradora'])->group(function () {

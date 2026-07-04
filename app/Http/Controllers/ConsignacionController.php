@@ -53,9 +53,7 @@ class ConsignacionController extends Controller
 
     public function index(): View
     {
-        $consignaciones = Consignacion::with('persona')->latest()->paginate(15);
-
-        return view('consignaciones.index', compact('consignaciones'));
+        return view('consignaciones.index');
     }
 
     public function create(): View
@@ -165,5 +163,12 @@ class ConsignacionController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Interés del 5% aplicado exitosamente.');
+    }
+
+    public function toggleEstado(Consignacion $consignacion): RedirectResponse
+    {
+        $consignacion->toggleEstado();
+
+        return redirect()->back()->with('success', 'Estado actualizado a '.($consignacion->estado === 'vigente' ? 'vigente' : 'finalizada').'.');
     }
 }
