@@ -13,7 +13,7 @@ Route::get('/', [DashboardController::class, 'index'])
     ->middleware('auth')
     ->name('dashboard');
 
-Route::get('/dashboard', fn () => redirect()->route('dashboard'));
+Route::redirect('/dashboard', '/');
 
 // Personas
 Route::resource('personas', PersonaController::class)

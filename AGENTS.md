@@ -14,11 +14,6 @@ composer setup
 # Dev server (runs artisan serve + queue + logs + vite concurrently)
 composer dev
 
-# Run all tests (uses SQLite :memory: — no MySQL needed)
-composer test
-# Single test
-php artisan test --filter=ExampleTest
-
 # Lint PHP (Laravel Pint — no custom pint.json, uses Laravel default preset)
 ./vendor/bin/pint
 
@@ -49,13 +44,16 @@ php artisan migrate:fresh --seed
 - `POST personas/{persona}/deactivate` — soft-deactivate a persona (admin only).
 - `POST personas/{persona}/restore` — restore a soft-deleted persona (admin only).
 - `POST personas/{persona}/interes-batch` — batch apply 5% interest to all consignaciones of a persona (admin only).
+- `POST personas/{persona}/cambiar-estado` — toggle `vigente`/`finalizada` on all consignaciones of a persona.
+- `POST consignaciones/{consignacion}/toggle-estado` — toggle `vigente`/`finalizada` on a single consignacion.
+- `GET auth/google` / `GET auth/google/callback` — Google OAuth login via Socialite (in `routes/auth.php`).
 
 ### Data model
 
 - All models use **ULID** primary keys (`HasUlids`). Foreign keys use `foreignUlid()`.
 - `Persona` and `Consignacion` use `SoftDeletes` and implement `Auditable` (Owen-IT) — writes to `audits` table, visible in Reportes audit log.
 - `User` does **not** use `SoftDeletes`.
-- `Consignacion belongsTo Persona`. Interest fields (`interes_aplicado`, `total_con_interes`, `interes_aplicado_by`, `interes_aplicado_at`) are only set by `aplicarInteres()` with a hardcoded 5% rate — interest cannot be edited from the update form.
+- `Consignacion belongsTo Persona`. Each `Consignacion` has an `estado` (`vigente`|`finalizada`), toggled via `toggleEstado()`. Interest fields (`tasa_aplicada`, `interes_aplicado`, `total_con_interes`, `interes_aplicado_by`, `interes_aplicado_at`) are computed in two places: `store()` applies `Persona.tasa_interes` (default 5%), while `aplicarInteres()` applies a hardcoded 5% — interest cannot be edited from the update form.
 - Roles: `administradora` (full access — delete, reports, apply interest) and `secretaria` (everything else). Seeded by `RoleSeeder`; default admin: `admin@xiands.com` / `password` (via `AdminSeeder`).
 
 ### File storage (comprobantes)
@@ -90,11 +88,13 @@ php artisan migrate:fresh --seed
 
 ---
 
-## Testing
+## Deployment (Docker)
 
-- `phpunit.xml` forces SQLite `:memory:`, array cache/session, sync queue. Tests never touch MySQL config.
-- `composer test` clears cached config first (`config:clear`) — always use this over bare `php artisan test` if config may be stale.
-- Only Breeze auth/profile tests exist (`tests/Feature/Auth/`, `tests/Feature/ProfileTest.php`). No feature tests for Personas, Consignaciones, or Reportes yet.
+- Multi-stage `Dockerfile` (PHP 8.4-FPM + nginx + supervisord). Runs 4 processes: php-fpm, nginx, the queue worker (`queue:work`), and the scheduler (`schedule:work`).
+- `docker/` holds `nginx.conf`, `supervisord.conf`, `php.ini` (opcache), and `entrypoint.sh`.
+- `entrypoint.sh` runs `migrate --force` on start (skip with `RUN_MIGRATIONS=false`) then caches config/routes/views/events. It does **not** seed — production must never run `TestDataSeeder`.
+- Routes must stay closure-free: `php artisan route:cache` runs on boot and fails on closure routes.
+- `.dockerignore` excludes `vendor`, `node_modules`, `.env`, tests, etc.
 
 ---
 
