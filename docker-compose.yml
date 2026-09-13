@@ -38,10 +38,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-password}
       RUN_MIGRATIONS: "true"
       RUN_SEED: "true"
-    expose:
-      - "80"
-    networks:
-      - dokploy-network
+    ports:
+      - "8080:80"
 
   db:
     image: mysql:8.4
@@ -60,12 +58,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
-    networks:
-      - dokploy-network
-
-networks:
-  dokploy-network:
-    external: true
 
 volumes:
   mysql_data:
