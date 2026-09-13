@@ -41,7 +41,7 @@ services:
     expose:
       - "80"
     networks:
-      - xiands
+      - dokploy-network
 
   db:
     image: mysql:8.4
@@ -61,11 +61,11 @@ services:
       retries: 10
       start_period: 30s
     networks:
-      - xiands
+      - dokploy-network
 
 networks:
-  xiands:
-    driver: bridge
+  dokploy-network:
+    external: true
 
 volumes:
   mysql_data:
