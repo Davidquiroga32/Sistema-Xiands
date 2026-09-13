@@ -52,6 +52,11 @@ php artisan migrate:fresh --seed   # corre RoleSeeder, AdminSeeder, TestDataSeed
 - Roles (Spatie Permission): `administradora` (acceso total — eliminar, reportes, aplicar interés) y `secretaria` (todo lo demás). Sembrados por `RoleSeeder`; el usuario admin por defecto lo crea `AdminSeeder` como `admin@xiands.com` / `password`.
 - `PersonaPolicy` / `ConsignacionPolicy`: `viewAny`/`view`/`create`/`update` retornan `true` para cualquier usuario autenticado; `delete`/`restore`/`forceDelete` requieren el rol `administradora`. Los controladores actualmente solo llaman `$this->authorize('delete', ...)` explícitamente en `destroy()` — las demás acciones dependen del middleware `role:` a nivel de ruta, no de las policies.
 
+### Despliegue (Docker)
+
+- `Dockerfile` multi-etapa (PHP 8.4-CLI + supervisord). Corre 3 procesos: `artisan serve` (puerto 8000, servidor embebido de PHP — sin nginx), el worker de cola (`queue:work`) y el scheduler (`schedule:work`).
+- `docker/` contiene `supervisord.conf`, `php.ini` (opcache) y `entrypoint.sh`.
+
 ### Almacenamiento de archivos (comprobantes)
 - Los comprobantes subidos van al disco definido en `config('filesystems.comprobantes_disk')` (env `FILESYSTEM_COMPROBANTES`, disco `b2` = Backblaze B2 vía driver compatible con S3).
 - `ConsignacionController::disk()` cae a `local` si el disco es `b2` pero no tiene una key configurada — no asumas que B2 siempre está disponible; revisa este fallback si estás depurando problemas de almacenamiento.

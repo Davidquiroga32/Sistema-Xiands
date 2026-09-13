@@ -90,8 +90,8 @@ php artisan migrate:fresh --seed
 
 ## Deployment (Docker)
 
-- Multi-stage `Dockerfile` (PHP 8.4-FPM + nginx + supervisord). Runs 4 processes: php-fpm, nginx, the queue worker (`queue:work`), and the scheduler (`schedule:work`).
-- `docker/` holds `nginx.conf`, `supervisord.conf`, `php.ini` (opcache), and `entrypoint.sh`.
+- Multi-stage `Dockerfile` (PHP 8.4-CLI + supervisord). Runs 3 processes: `artisan serve` (port 8000), the queue worker (`queue:work`), and the scheduler (`schedule:work`). No nginx — the app uses PHP's built-in server.
+- `docker/` holds `supervisord.conf`, `php.ini` (opcache), and `entrypoint.sh`.
 - `entrypoint.sh` runs `migrate --force` on start (skip with `RUN_MIGRATIONS=false`) then caches config/routes/views/events. It does **not** seed — production must never run `TestDataSeeder`.
 - Routes must stay closure-free: `php artisan route:cache` runs on boot and fails on closure routes.
 - `.dockerignore` excludes `vendor`, `node_modules`, `.env`, tests, etc.

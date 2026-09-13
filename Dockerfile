@@ -1,8 +1,7 @@
-# ---- Base: PHP 8.4-FPM + nginx + supervisor + extensiones ----
-FROM php:8.4-fpm AS base
+# ---- Base: PHP 8.4-CLI + supervisor + extensiones ----
+FROM php:8.4-cli AS base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        nginx \
         supervisor \
         curl \
         git \
@@ -55,19 +54,17 @@ FROM base
 
 COPY --from=builder /app /app
 
-COPY docker/nginx.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisor/supervisord.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-xiands.ini
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
-    && mkdir -p /var/www /run/php \
     && chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-EXPOSE 80
+EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-    CMD curl -fsS http://127.0.0.1/ || exit 1
+    CMD curl -fsS http://127.0.0.1:8000/ || exit 1
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
