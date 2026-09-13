@@ -32,7 +32,7 @@ php artisan migrate:fresh --seed
 - Standard Laravel structure — controllers talk directly to Eloquent models. Only one service class: `app/Services/OcrService.php`.
 - **Frontend is Blade + Livewire**, not a JS SPA. There is one Livewire SFC: `resources/views/components/buscar-persona.blade.php` (anonymous class). Everything else in `components/` is a plain Blade component.
 - Three main resource areas: **Personas** (`PersonaController`), **Consignaciones** (`ConsignacionController`), **Reportes** (`ReporteController`, admin-only).
-- Auth routes (Breeze + Google OAuth via Socialite) are in `routes/auth.php`.
+- Auth routes (Breeze) are in `routes/auth.php`. Google OAuth was removed — login is email/password only.
 
 ### Routing (`routes/web.php`)
 
@@ -46,7 +46,7 @@ php artisan migrate:fresh --seed
 - `POST personas/{persona}/interes-batch` — batch apply 5% interest to all consignaciones of a persona (admin only).
 - `POST personas/{persona}/cambiar-estado` — toggle `vigente`/`finalizada` on all consignaciones of a persona.
 - `POST consignaciones/{consignacion}/toggle-estado` — toggle `vigente`/`finalizada` on a single consignacion.
-- `GET auth/google` / `GET auth/google/callback` — Google OAuth login via Socialite (in `routes/auth.php`).
+- `GET register` / `POST register` — public self-registration (Breeze default). If the site should be closed, restrict or remove these.
 
 ### Data model
 

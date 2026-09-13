@@ -117,13 +117,4 @@
             Ingresar
         </button>
     </form>
-
-    @if (Route::has('register'))
-        <div style="text-align:center;margin-top:1.5rem;">
-            <a href="{{ route('register') }}" style="font-size:0.75rem;color:var(--silver-dark);text-decoration:none;letter-spacing:0.05em;transition:color 0.2s;"
-                onmouseover="this.style.color='var(--silver-light)'" onmouseout="this.style.color='var(--silver-dark)'">
-                &iquest;No tienes cuenta? Reg&iacute;strate
-            </a>
-        </div>
-    @endif
 @endsection
