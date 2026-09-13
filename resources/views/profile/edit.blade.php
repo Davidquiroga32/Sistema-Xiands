@@ -97,6 +97,26 @@
             </form>
         </div>
 
+        {{-- Gestión de usuarios (solo administradora) --}}
+        @if (Auth::user()->hasRole('administradora'))
+            <a href="{{ route('users.index') }}" class="card-dark card-dark-hover" style="padding:1.2rem;margin-bottom:1rem;text-decoration:none;display:block;">
+                <div style="display:flex;align-items:center;gap:0.9rem;">
+                    <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#222,#2e2e2e);border:1px solid var(--border-lit);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <svg style="width:1.1rem;height:1.1rem;color:var(--silver-light);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M19 8v6M22 11h-6"/>
+                        </svg>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:600;color:var(--silver-bright);">Gesti&oacute;n de usuarios</div>
+                        <div style="font-size:0.68rem;color:var(--silver-dark);margin-top:0.15rem;">Crear y administrar cuentas de administradora y secretaria</div>
+                    </div>
+                    <span style="color:var(--silver-dark);">&#8250;</span>
+                </div>
+            </a>
+        @endif
+
         {{-- Delete Account --}}
         <div class="card-dark" style="padding:1.2rem;border-color:rgba(220,38,38,0.2);" x-data="{ open: false }">
             <div style="font-family:'Outfit',sans-serif;font-size:0.8rem;font-weight:600;letter-spacing:0.1em;color:#f87171;margin-bottom:0.5rem;">Eliminar cuenta</div>

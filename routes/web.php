@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Dashboard (requires auth)
@@ -71,6 +72,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Gestión de usuarios (solo administradora)
+Route::middleware(['auth', 'role:administradora'])->group(function () {
+    Route::get('/usuarios', [UserController::class, 'index'])->name('users.index');
+    Route::post('/usuarios', [UserController::class, 'store'])->name('users.store');
+    Route::patch('/usuarios/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/usuarios/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 require __DIR__.'/auth.php';
