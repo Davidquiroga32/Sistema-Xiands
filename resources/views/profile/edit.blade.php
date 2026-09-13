@@ -55,7 +55,8 @@
             </form>
         </div>
 
-        {{-- Update Password --}}
+        {{-- Update Password (solo administradora) --}}
+        @if (Auth::user()->hasRole('administradora'))
         <div class="card-dark" style="padding:1.2rem;margin-bottom:1rem;">
             <div style="font-family:'Outfit',sans-serif;font-size:0.8rem;font-weight:600;letter-spacing:0.1em;color:var(--silver-bright);margin-bottom:1rem;">Cambiar contrase&ntilde;a</div>
 
@@ -96,6 +97,7 @@
                 @endif
             </form>
         </div>
+        @endif
 
         {{-- Gestión de usuarios (solo administradora) --}}
         @if (Auth::user()->hasRole('administradora'))

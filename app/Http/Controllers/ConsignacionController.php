@@ -6,6 +6,7 @@ use App\Http\Requests\StoreConsignacionRequest;
 use App\Http\Requests\UpdateConsignacionRequest;
 use App\Models\Consignacion;
 use App\Models\Persona;
+use App\Services\ComprobanteStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -14,41 +15,12 @@ class ConsignacionController extends Controller
 {
     private function disk(): string
     {
-        $disk = config('filesystems.comprobantes_disk', 'b2');
-
-        // Fallback to public if B2/Local is not configured or unreachable
-        if ($disk === 'b2' && ! config('filesystems.disks.b2.key')) {
-            return 'public';
-        }
-
-        if ($disk === 'local') {
-            return 'public';
-        }
-
-        return $disk;
+        return ComprobanteStorage::disk();
     }
 
     private function comprobanteUrl(?string $path): ?string
     {
-        if (! $path) {
-            return null;
-        }
-
-        $disk = $this->disk();
-
-        if ($disk === 'b2') {
-            $url = rescue(
-                fn () => Storage::disk('b2')->temporaryUrl($path, now()->addMinutes(30)),
-                null,
-                false,
-            );
-
-            if ($url) {
-                return $url;
-            }
-        }
-
-        return asset('storage/'.$path);
+        return ComprobanteStorage::url($path);
     }
 
     public function index(): View
@@ -152,17 +124,18 @@ class ConsignacionController extends Controller
 
     public function aplicarInteres(Consignacion $consignacion): RedirectResponse
     {
-        $interes = round($consignacion->valor_consignado * 0.05, 2);
+        $tasa = (float) ($consignacion->persona?->tasa_interes ?: 5);
+        $interes = round($consignacion->valor_consignado * ($tasa / 100), 2);
 
         $consignacion->update([
-            'tasa_aplicada' => 5.00,
+            'tasa_aplicada' => $tasa,
             'interes_aplicado' => $interes,
             'total_con_interes' => round($consignacion->valor_consignado + $interes, 2),
             'interes_aplicado_by' => auth()->id(),
             'interes_aplicado_at' => now(),
         ]);
 
-        return redirect()->back()->with('success', 'Interés del 5% aplicado exitosamente.');
+        return redirect()->back()->with('success', "Interés del {$tasa}% aplicado exitosamente.");
     }
 
     public function toggleEstado(Consignacion $consignacion): RedirectResponse

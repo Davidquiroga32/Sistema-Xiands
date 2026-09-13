@@ -12,11 +12,6 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'role:administradora']);
-    }
-
     public function index(): View
     {
         $users = User::with('roles')->latest()->get();

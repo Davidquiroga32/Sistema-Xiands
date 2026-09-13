@@ -40,6 +40,9 @@ new class extends Component
             $query->where('created_at', '>=', now()->subDays(8));
         }
 
+        $query->withSum('consignaciones', 'valor_consignado')
+            ->withCount('consignaciones');
+
         $personas = $query->latest()->paginate(12);
         $totalPersonas = Persona::count();
         $totalConsignaciones = \App\Models\Consignacion::count();
@@ -117,8 +120,8 @@ new class extends Component
                         </div>
                     </div>
                     <div class="person-right">
-                        <div class="person-amount">${{ number_format($persona->consignaciones->sum('valor_consignado'), 0, ',', '.') }}</div>
-                        <div class="person-count">{{ $persona->consignaciones->count() }} consign.</div>
+                        <div class="person-amount">${{ number_format($persona->consignaciones_sum_valor_consignado ?? 0, 0, ',', '.') }}</div>
+                        <div class="person-count">{{ $persona->consignaciones_count }} consign.</div>
                     </div>
                 </div>
             </a>

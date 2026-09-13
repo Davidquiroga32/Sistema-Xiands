@@ -37,8 +37,7 @@
     </a>
 
     <a href="{{ route('reportes.index') }}"
-       class="flex flex-col items-center gap-1 py-2 px-6 text-decoration-none {{ str_starts_with($routeName, 'reportes') ? 'text-[--silver-light]' : 'text-[--silver-dark]' }} transition-colors duration-200 hover:text-[--silver]"
-       @if (! auth()->user()->hasRole('administradora')) style="display:none;" @endif>
+       class="flex flex-col items-center gap-1 py-2 px-6 text-decoration-none {{ str_starts_with($routeName, 'reportes') ? 'text-[--silver-light]' : 'text-[--silver-dark]' }} transition-colors duration-200 hover:text-[--silver]">
         <svg style="width:1.35rem;height:1.35rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 20V10.5"/>
             <path d="M10 20V4.5"/>

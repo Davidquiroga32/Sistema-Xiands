@@ -18,7 +18,6 @@ class OcrService
 
         return match ($engine) {
             'tesseract' => $this->procesarConTesseract($file),
-            'google_vision' => $this->procesarConGoogleVision($file),
             default => null,
         };
     }
@@ -45,12 +44,6 @@ class OcrService
                 Storage::disk('local')->delete($tempPath);
             }
         }
-    }
-
-    private function procesarConGoogleVision(UploadedFile $file): ?array
-    {
-        // Requires google/cloud-vision package and GOOGLE_APPLICATION_CREDENTIALS
-        return null;
     }
 
     /**

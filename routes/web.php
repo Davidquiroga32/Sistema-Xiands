@@ -29,7 +29,7 @@ Route::post('personas/{persona}/restore', [PersonaController::class, 'restore'])
     ->name('personas.restore');
 
 Route::post('personas/{persona}/interes-batch', [PersonaController::class, 'aplicarInteresBatch'])
-    ->middleware(['auth', 'role:administradora'])
+    ->middleware('auth')
     ->name('personas.interes-batch');
 
 Route::post('personas/{persona}/cambiar-estado', [PersonaController::class, 'cambiarEstadoBatch'])
@@ -41,9 +41,9 @@ Route::resource('consignaciones', ConsignacionController::class)
     ->parameters(['consignaciones' => 'consignacion'])
     ->middleware('auth');
 
-// Aplicar interés (solo administradora)
+// Aplicar interés (administradora y secretaria)
 Route::post('consignaciones/{consignacion}/interes', [ConsignacionController::class, 'aplicarInteres'])
-    ->middleware(['auth', 'role:administradora'])
+    ->middleware('auth')
     ->name('consignaciones.interes');
 
 // Cambiar estado de consignacion
@@ -51,8 +51,8 @@ Route::post('consignaciones/{consignacion}/toggle-estado', [ConsignacionControll
     ->middleware('auth')
     ->name('consignaciones.toggle-estado');
 
-// Reportes (solo Administradora)
-Route::middleware(['auth', 'role:administradora'])->group(function () {
+// Reportes (administradora y secretaria)
+Route::middleware('auth')->group(function () {
     Route::get('reportes', [ReporteController::class, 'index'])->name('reportes.index');
     Route::get('reportes/pdf', [ReporteController::class, 'exportPdf'])->name('reportes.pdf');
     Route::get('reportes/excel', [ReporteController::class, 'exportExcel'])->name('reportes.excel');

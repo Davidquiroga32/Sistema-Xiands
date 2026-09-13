@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Consignacion;
+use App\Services\ComprobanteStorage;
 use App\Services\OcrService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,13 +18,18 @@ class ComprobanteController extends Controller
             abort(404);
         }
 
-        $disk = config('filesystems.comprobantes_disk', 'b2');
-        $url = Storage::disk($disk)->temporaryUrl(
-            $consignacion->comprobante_path,
-            now()->addMinutes(30),
-        );
+        $disk = ComprobanteStorage::disk();
 
-        return redirect()->away($url);
+        if ($disk === 'b2') {
+            $url = Storage::disk('b2')->temporaryUrl(
+                $consignacion->comprobante_path,
+                now()->addMinutes(30),
+            );
+
+            return redirect()->away($url);
+        }
+
+        return redirect()->to(asset('storage/'.$consignacion->comprobante_path));
     }
 
     public function procesar(Request $request, OcrService $ocr): JsonResponse
