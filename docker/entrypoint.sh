@@ -16,6 +16,11 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     done
 fi
 
+if [ "${RUN_SEED:-true}" = "true" ]; then
+    php artisan db:seed --class=RoleSeeder --force
+    php artisan db:seed --class=AdminSeeder --force
+fi
+
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache

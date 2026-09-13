@@ -56,7 +56,7 @@ FROM base
 COPY --from=builder /app /app
 
 COPY docker/nginx.conf /etc/nginx/sites-available/default
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/supervisord.conf /etc/supervisor/supervisord.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/zz-xiands.ini
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
@@ -65,6 +65,9 @@ RUN chmod +x /usr/local/bin/entrypoint.sh \
     && chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
 EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD curl -fsS http://127.0.0.1/ || exit 1
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
