@@ -21,12 +21,31 @@
     --glow: rgba(200,200,200,0.08);
   }
 
+  /* Tema claro: se activa poniendo data-theme="light" en <html> (ver x-theme-toggle). */
+  :root[data-theme="light"] {
+    --black: #ffffff;
+    --dark: #f6f6f6;
+    --card: #ffffff;
+    --card2: #f2f2f2;
+    --border: #e3e3e3;
+    --border-lit: #cfcfcf;
+    --silver-dark: #9a9a9a;
+    --silver: #6b6b6b;
+    --silver-light: #444444;
+    --silver-bright: #161616;
+    --white: #161616;
+    --green: #3f6b3f;
+    --accent: #555555;
+    --glow: rgba(0,0,0,0.05);
+  }
+
   html, body {
     min-height: 100%;
     background: var(--black);
     color: var(--white);
     font-family: 'Inter', sans-serif;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   [x-cloak] { display: none !important; }
@@ -45,7 +64,7 @@
   .btn-primary-dark {
     @apply btn w-full rounded-xl border-0;
     background: linear-gradient(135deg, #2a2a2a 0%, #3d3d3d 50%, #2a2a2a 100%);
-    color: var(--white);
+    color: #f0f0f0;
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     letter-spacing: 0.15em;
@@ -90,7 +109,7 @@
     @apply btn border rounded-xl flex-1;
     border-color: var(--border-lit);
     background: linear-gradient(135deg, #2a2a2a, #3d3d3d);
-    color: var(--white);
+    color: #f0f0f0;
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -103,6 +122,7 @@
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
   }
 
   .card-dark-hover {
@@ -364,6 +384,90 @@
   }
   .empty-state .icon { font-size: 2rem; color: var(--border-lit); margin-bottom: 1rem; }
   .empty-state p { font-size: 0.8rem; color: var(--silver-dark); line-height: 1.6; }
+
+  /* --- Interruptor de tema (sol/luna) --- */
+  .bottom-nav-bar {
+    background: rgba(10,10,10,0.95);
+    transition: background-color 0.25s ease;
+  }
+
+  .theme-toggle {
+    background: none; border: none; padding: 0; cursor: pointer;
+    flex-shrink: 0; display: flex; align-items: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .theme-toggle-track {
+    position: relative;
+    width: 52px; height: 28px;
+    border-radius: 999px;
+    background: var(--card2);
+    border: 1px solid var(--border-lit);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 6px;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+  .theme-toggle-icon {
+    width: 13px; height: 13px; position: relative; z-index: 1;
+    transition: color 0.25s ease, opacity 0.25s ease;
+  }
+  .theme-toggle-icon.sun { color: #e0b23e; }
+  .theme-toggle-icon.moon { color: var(--silver-light); }
+  .theme-toggle-thumb {
+    position: absolute; top: 3px; left: 3px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #0a0a0a;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), background-color 0.25s ease;
+    transform: translateX(24px);
+  }
+  :root[data-theme="light"] .theme-toggle-thumb {
+    transform: translateX(0);
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    border: 1px solid var(--border-lit);
+  }
+
+  /* --- Superficies con color fijo (no dependen de var()): overrides para tema claro --- */
+  :root[data-theme="light"] .avatar {
+    background: linear-gradient(135deg, #ececec, #dcdcdc);
+    color: #333333;
+  }
+  :root[data-theme="light"] .avatar::after {
+    background: radial-gradient(circle at 30% 30%, rgba(0,0,0,0.06), transparent 50%);
+  }
+  :root[data-theme="light"] .glass-card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(248,248,248,0.98));
+    box-shadow: 0 40px 80px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  :root[data-theme="light"] .gradient-text {
+    background-image: linear-gradient(135deg, #333333, #666666);
+  }
+  :root[data-theme="light"] .stat-mini .val {
+    background-image: linear-gradient(135deg, #222222, #555555);
+  }
+  :root[data-theme="light"] .person-amount {
+    background-image: linear-gradient(135deg, #333333, #111111);
+  }
+  :root[data-theme="light"] .search-section {
+    background: rgba(255,255,255,0.75);
+  }
+  :root[data-theme="light"] .filter-chip.active {
+    background: rgba(0,0,0,0.05);
+  }
+  :root[data-theme="light"] .ambient-bg {
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,0,0,0.035) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 100%, rgba(0,0,0,0.025) 0%, transparent 50%),
+      var(--black);
+  }
+  :root[data-theme="light"] .grid-bg {
+    background-image:
+      linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  }
+  :root[data-theme="light"] .bottom-nav-bar {
+    background: rgba(255,255,255,0.92);
+  }
 }
 
 @layer utilities {

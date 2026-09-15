@@ -2,6 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <script>
+        try {
+            if (localStorage.getItem('xiands-theme') === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        } catch (e) {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@hasSection('title')@yield('title') — @endif{{ config('app.name', 'XIANDS') }}</title>
@@ -21,7 +28,9 @@
             border-bottom: 1px solid var(--border);
             padding: 0.85rem 1.25rem;
             display: flex; align-items: center; gap: 1rem;
+            transition: background-color 0.25s ease, border-color 0.25s ease;
         }
+        :root[data-theme="light"] .top-bar { background: rgba(255,255,255,0.85); }
 
         .logo-sm {
             display: flex; align-items: center; gap: 0.6rem;
@@ -44,6 +53,9 @@
             background: linear-gradient(135deg, #888, #e0e0e0, #aaa);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
+        :root[data-theme="light"] .logo-sm span {
+            background-image: linear-gradient(135deg, #333, #111, #444);
+        }
 
         .top-title {
             flex: 1;
@@ -53,7 +65,7 @@
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
-        .top-actions { display: flex; gap: 0.5rem; }
+        .top-actions { display: flex; align-items: center; gap: 0.5rem; }
         .icon-btn {
             width: 36px; height: 36px;
             border: 1px solid var(--border);
@@ -65,6 +77,8 @@
             text-decoration: none; flex-shrink: 0;
         }
         .icon-btn:hover { border-color: var(--border-lit); color: var(--silver-light); background: rgba(255,255,255,0.06); }
+        :root[data-theme="light"] .icon-btn { background: rgba(0,0,0,0.03); }
+        :root[data-theme="light"] .icon-btn:hover { background: rgba(0,0,0,0.05); }
 
         .back-btn {
             width: 34px; height: 34px; border-radius: 10px;
@@ -84,7 +98,7 @@
             width: 52px; height: 52px; border-radius: 16px;
             background: linear-gradient(135deg, #2a2a2a, #3d3d3d);
             border: 1px solid var(--border-lit);
-            color: var(--white); font-size: 1.4rem;
+            color: #f0f0f0; font-size: 1.4rem;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; z-index: 80;
             text-decoration: none;
@@ -124,6 +138,7 @@
         </a>
         <div class="top-title">@yield('page_title', '')</div>
         <div class="top-actions">
+            <x-theme-toggle />
             <a href="{{ route('profile.edit') }}" class="icon-btn" title="Perfil">
                 <svg style="width:1.1rem;height:1.1rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="9"/>

@@ -2,7 +2,7 @@
     $routeName = request()->route()->getName();
 @endphp
 
-<nav class="fixed bottom-0 left-0 right-0 z-[100] bg-[rgba(10,10,10,0.95)] backdrop-blur-xl border-t border-[--border] flex items-center justify-around"
+<nav class="bottom-nav-bar fixed bottom-0 left-0 right-0 z-[100] backdrop-blur-xl border-t border-[--border] flex items-center justify-around"
      style="min-height: var(--bottom-nav-h); padding-bottom: env(safe-area-inset-bottom);">
 
     <a href="{{ route('dashboard') }}"

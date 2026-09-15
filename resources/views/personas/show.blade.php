@@ -365,7 +365,7 @@
                         </div>
                     </div>
                     <div style="font-size:0.55rem;color:var(--silver-dark);margin-bottom:0.6rem;">Deja las fechas vac&iacute;as para aplicar a todas.</div>
-                    <button type="submit" style="width:100%;margin-top:0.2rem;padding:0.75rem;border-radius:10px;background:linear-gradient(135deg,#2a2a2a,#3a3a3a);border:1px solid var(--border-lit);color:var(--white);font-family:'Outfit',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;">
+                    <button type="submit" style="width:100%;margin-top:0.2rem;padding:0.75rem;border-radius:10px;background:linear-gradient(135deg,#2a2a2a,#3a3a3a);border:1px solid var(--border-lit);color:#f0f0f0;font-family:'Outfit',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;">
                         Guardar tasa de inter&eacute;s
                     </button>
                 </div>

@@ -2,6 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <script>
+        try {
+            if (localStorage.getItem('xiands-theme') === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        } catch (e) {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'XIANDS') }} — Acceso</title>
@@ -94,11 +101,24 @@
             .logo-mark { width: 110px; height: 110px; }
             .logo-name { font-size: 2.2rem; }
         }
+
+        :root[data-theme="light"] .logo-name {
+            background-image: linear-gradient(135deg, #222 0%, #000 40%, #333 60%, #111 100%);
+        }
+
+        .auth-theme-toggle {
+            position: fixed; top: calc(1rem + env(safe-area-inset-top, 0px)); right: 1rem;
+            z-index: 20;
+        }
     </style>
 </head>
 <body>
     <div class="ambient-bg"></div>
     <div class="grid-bg"></div>
+
+    <div class="auth-theme-toggle">
+        <x-theme-toggle />
+    </div>
 
     <div class="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-8">
         <div class="logo-block">
